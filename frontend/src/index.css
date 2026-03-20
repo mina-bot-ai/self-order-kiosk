@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  body {
+    @apply bg-gray-950 text-white overflow-hidden;
+    font-family: system-ui, -apple-system, sans-serif;
+    user-select: none;
+  }
+}
+
+@layer components {
+  .kiosk-btn {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+
+  .category-tab {
+    @apply px-6 py-4 rounded-2xl text-lg font-bold transition-all duration-200 cursor-pointer kiosk-btn;
+  }
+
+  .menu-card {
+    @apply bg-gray-800 rounded-3xl overflow-hidden shadow-lg cursor-pointer
+           hover:shadow-orange-500/20 hover:shadow-2xl
+           active:scale-95 transition-all duration-150;
+  }
+
+  .cart-badge {
+    @apply absolute -top-2 -right-2 bg-orange-500 text-white text-sm font-bold
+           rounded-full w-6 h-6 flex items-center justify-center;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.4);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 53, 0.7);
+}
