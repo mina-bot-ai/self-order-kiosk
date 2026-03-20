@@ -12,7 +12,7 @@ export default function MenuPage({ onCheckout }) {
   const { itemCount } = useCart();
 
   useEffect(() => {
-    fetch('/api/menu')
+    fetch(`${import.meta.env.VITE_API_URL || ''}/api/menu`)
       .then(r => r.json())
       .then(data => {
         setMenuData(data);
