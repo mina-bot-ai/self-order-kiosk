@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import WelcomeScreen from './pages/WelcomeScreen';
 import MenuPage from './pages/MenuPage';
 import CheckoutPage from './pages/CheckoutPage';
 import ConfirmationPage from './pages/ConfirmationPage';
+import AdminPage from './pages/AdminPage';
 
-export default function App() {
+function KioskApp() {
   const [screen, setScreen] = useState('welcome'); // welcome | menu | checkout | confirmation
   const [orderData, setOrderData] = useState(null);
 
@@ -23,12 +25,8 @@ export default function App() {
   return (
     <CartProvider>
       <div className="w-screen h-screen overflow-hidden">
-        {screen === 'welcome' && (
-          <WelcomeScreen onStart={handleStart} />
-        )}
-        {screen === 'menu' && (
-          <MenuPage onCheckout={handleCheckout} />
-        )}
+        {screen === 'welcome' && <WelcomeScreen onStart={handleStart} />}
+        {screen === 'menu' && <MenuPage onCheckout={handleCheckout} />}
         {screen === 'checkout' && (
           <CheckoutPage onOrderPlaced={handleOrderPlaced} onBack={() => setScreen('menu')} />
         )}
@@ -37,5 +35,15 @@ export default function App() {
         )}
       </div>
     </CartProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<KioskApp />} />
+      <Route path="/admin" element={<AdminPage />} />
+      <Route path="/admin/*" element={<AdminPage />} />
+    </Routes>
   );
 }

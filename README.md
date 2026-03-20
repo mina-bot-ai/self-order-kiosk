@@ -1,200 +1,120 @@
-# 🍔 QuickBite — Fast Food Self-Ordering Kiosk
+# 🍔 Self-Order Kiosk
 
-A touchscreen-optimized self-ordering kiosk web app built with React + Vite (frontend) and Node.js + Express (backend).
+A full-featured fast food self-ordering kiosk app with Stripe payments, an admin dashboard, and custom menu management.
 
-![Kiosk Screenshot](https://placehold.co/800x400/1a1a2e/ff6b35?text=QuickBite+Kiosk)
+**Live Demo:**
+- 🛒 Kiosk: https://self-order-kiosk-sigma.vercel.app
+- ⚙️ Admin: https://self-order-kiosk-sigma.vercel.app/admin
+- 🔌 API: https://backend-rho-gray-28.vercel.app
 
-## ✨ Features
+---
 
-- **Welcome Screen** — Animated "Touch to Start" landing page
-- **Menu Browsing** — Category tabs (Burgers, Sides, Drinks, Desserts) with item grid
-- **Item Detail Modal** — Size selector, quantity picker, add to cart
-- **Cart Sidebar** — Slide-in cart with item management, subtotal
-- **Checkout Page** — Full order summary with tax calculation
-- **Order Confirmation** — Order number, estimated wait time, auto-reset
-- Designed for **touchscreens** — large tap targets, smooth animations, dark theme
+## Features
 
-## 🏗️ Project Structure
+### 🛒 Kiosk App (`/`)
+- Browse menu by category (Burgers, Chicken, Sides, Drinks, Desserts)
+- Add items to cart with size selection
+- Checkout with Stripe card payment
+- Order confirmation with wait time
 
-```
-self-order-kiosk/
-├── backend/
-│   ├── data/
-│   │   └── menu.json          # Menu data (categories + items)
-│   ├── routes/
-│   │   ├── menu.js            # GET /api/menu
-│   │   └── orders.js          # POST /api/orders, GET /api/orders/:id
-│   ├── server.js              # Express app entry point
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── CartSidebar.jsx    # Slide-in cart panel
-│   │   │   ├── ItemModal.jsx      # Item detail / size / qty modal
-│   │   │   └── MenuGrid.jsx       # Menu item cards grid
-│   │   ├── context/
-│   │   │   └── CartContext.jsx    # Global cart state (useReducer)
-│   │   ├── data/
-│   │   │   └── menuFallback.js    # Offline fallback menu data
-│   │   ├── pages/
-│   │   │   ├── CheckoutPage.jsx   # Order summary + pay button
-│   │   │   ├── ConfirmationPage.jsx # Order placed screen
-│   │   │   ├── MenuPage.jsx       # Main menu browsing page
-│   │   │   └── WelcomeScreen.jsx  # "Touch to Start" screen
-│   │   ├── App.jsx                # Screen router
-│   │   ├── index.css              # Tailwind + custom styles
-│   │   └── main.jsx               # React entry point
-│   ├── index.html
-│   ├── package.json
-│   ├── postcss.config.js
-│   ├── tailwind.config.js
-│   └── vite.config.js             # Dev proxy: /api → localhost:3001
-└── README.md
-```
+### 💳 Stripe Payment Integration
+- Secure card payment modal with Stripe Card Element
+- Test mode — use Stripe test card `4242 4242 4242 4242`
+- PaymentIntent flow: create intent → confirm card → confirm order
 
-## 🚀 Getting Started
+### ⚙️ Admin Dashboard (`/admin`)
+- Password-protected (default: `admin123`)
+- **Orders tab:** View all orders, advance status (received → preparing → ready → completed), auto-refreshes every 10s
+- **Menu tab:** View all menu items; add/edit/delete custom specials
 
-### Prerequisites
+### 🍽️ Custom Menu Items
+- Add custom items via Admin → Menu tab
+- Custom items persist to `backend/data/custom-menu.json`
+- Merged with default menu on every `GET /api/menu` call
 
-- Node.js 18+
-- npm or yarn
+---
 
-### 1. Install Backend Dependencies
+## Quick Start
+
+### Backend
 
 ```bash
 cd backend
+cp .env.example .env
+# Edit .env with your Stripe secret key
 npm install
-```
-
-### 2. Install Frontend Dependencies
-
-```bash
-cd frontend
-npm install
-```
-
-### 3. Run the Backend
-
-```bash
-cd backend
 npm start
-# Server runs on http://localhost:3001
 ```
 
-For development with auto-reload:
-```bash
-npm run dev
-```
-
-### 4. Run the Frontend
+### Frontend
 
 ```bash
 cd frontend
+cp .env.example .env
+# Edit .env with your Stripe publishable key and API URL
+npm install
 npm run dev
-# App runs on http://localhost:5173
 ```
 
-The Vite dev server proxies `/api` requests to `http://localhost:3001`, so both can run simultaneously.
+---
 
-### 5. Open in Browser
+## Environment Variables
 
-Navigate to **http://localhost:5173** and tap "Touch to Start"!
+### Backend (`backend/.env`)
 
-> **Note:** The frontend includes offline fallback menu data, so it works even without the backend running. Orders will still simulate successfully in offline mode.
+| Variable | Description | Default |
+|---|---|---|
+| `STRIPE_SECRET_KEY` | Stripe secret key | `sk_test_your_key_here` |
+| `PORT` | Server port | `3001` |
 
-## 🌐 API Reference
+### Frontend (`frontend/.env`)
 
-### `GET /api/menu`
-Returns all menu categories and items.
+| Variable | Description | Default |
+|---|---|---|
+| `VITE_API_URL` | Backend API base URL | (same origin) |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | `pk_test_your_key_here` |
 
-**Response:**
-```json
-{
-  "categories": [
-    {
-      "id": "burgers",
-      "name": "Burgers",
-      "icon": "🍔",
-      "items": [
-        {
-          "id": "b1",
-          "name": "Classic Burger",
-          "price": 5.99,
-          "sizes": ["Regular", "Large"],
-          "sizePrices": [0, 1.5],
-          ...
-        }
-      ]
-    }
-  ]
-}
-```
+---
 
-### `POST /api/orders`
-Create a new order.
+## API Reference
 
-**Request body:**
-```json
-{
-  "items": [
-    { "id": "b1", "name": "Classic Burger", "size": "Regular", "quantity": 2, "price": 5.99 }
-  ],
-  "total": 12.93
-}
-```
+### Public Endpoints
 
-**Response:**
-```json
-{
-  "orderNumber": "#1001",
-  "waitTime": 8,
-  "status": "received",
-  "createdAt": "2024-01-15T12:00:00.000Z"
-}
-```
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/menu` | Get menu (default + custom items merged) |
+| `POST` | `/api/orders` | Create a new order |
+| `GET` | `/api/orders/:id` | Get order status |
+| `POST` | `/api/create-payment-intent` | Create Stripe PaymentIntent |
+| `POST` | `/api/confirm-order` | Confirm order after payment |
 
-### `GET /api/orders/:id`
-Get order status by order number.
+### Admin Endpoints (require `x-admin-token: admin123` header)
 
-**Response:**
-```json
-{
-  "id": "#1001",
-  "items": [...],
-  "total": 12.93,
-  "status": "preparing",
-  "waitTime": 8,
-  "createdAt": "2024-01-15T12:00:00.000Z"
-}
-```
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/admin/orders` | Get all orders |
+| `PATCH` | `/api/admin/orders/:id` | Update order status |
+| `GET` | `/api/admin/menu` | Get full menu |
+| `POST` | `/api/admin/menu/items` | Add custom menu item |
+| `PUT` | `/api/admin/menu/items/:id` | Update custom item |
+| `DELETE` | `/api/admin/menu/items/:id` | Delete custom item |
 
-## 🍔 Sample Menu
+---
 
-| Category | Items |
-|----------|-------|
-| 🍔 Burgers | Classic Burger $5.99, Cheese Burger $6.99, Bacon Burger $7.99, Veggie Burger $6.49 |
-| 🍟 Sides | French Fries $2.99, Onion Rings $3.49, Coleslaw $1.99 |
-| 🥤 Drinks | Cola $1.99, Lemonade $2.49, Water $0.99, Milkshake $3.99 |
-| 🍦 Desserts | Ice Cream $2.49, Apple Pie $1.99, Cookies $1.49 |
+## Stripe Test Cards
 
-## 🛠️ Tech Stack
+| Card | Description |
+|---|---|
+| `4242 4242 4242 4242` | Success |
+| `4000 0000 0000 9995` | Decline (insufficient funds) |
+| `4000 0025 0000 3155` | 3D Secure required |
 
-| Layer | Tech |
-|-------|------|
-| Frontend | React 18, Vite 5, TailwindCSS 3 |
-| Backend | Node.js, Express 4 |
-| State | React Context + useReducer |
-| Styling | TailwindCSS + custom CSS |
-| Images | placehold.co placeholder images |
-| Data | In-memory (orders) + JSON (menu) |
+Use any future expiry date and any 3-digit CVC.
 
-## 📱 Kiosk Deployment Tips
+---
 
-- Run in kiosk/fullscreen mode: `chromium --kiosk http://localhost:5173`
-- Disable screen sleep on the kiosk device
-- Use `npm run build` + `npm run preview` for production serving
-- Consider nginx as a reverse proxy for production
+## Tech Stack
 
-## 📄 License
-
-MIT
+- **Frontend:** React 18, Vite, Tailwind CSS, React Router, Stripe.js
+- **Backend:** Node.js, Express, Stripe SDK
+- **Deployment:** Vercel

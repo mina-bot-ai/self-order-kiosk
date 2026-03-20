@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-// In-memory order store
-const orders = new Map();
-let orderCounter = 1000;
+// Shared in-memory order store (exported so other routes can access it)
+const _store = new Map();
+let _counter = 1000;
+
+const orders = { _store, get _counter() { return _counter; }, set _counter(v) { _counter = v; } };
 
 function generateOrderNumber() {
-  return `#${++orderCounter}`;
+  return `#${++_counter}`;
 }
 
 function estimateWaitTime(itemCount) {
@@ -36,18 +38,18 @@ router.post('/', (req, res) => {
     createdAt: new Date().toISOString(),
   };
 
-  orders.set(orderNumber, order);
+  _store.set(orderNumber, order);
 
   // Simulate order progression
   setTimeout(() => {
-    if (orders.has(orderNumber)) {
-      orders.get(orderNumber).status = 'preparing';
+    if (_store.has(orderNumber)) {
+      _store.get(orderNumber).status = 'preparing';
     }
   }, 30000);
 
   setTimeout(() => {
-    if (orders.has(orderNumber)) {
-      orders.get(orderNumber).status = 'ready';
+    if (_store.has(orderNumber)) {
+      _store.get(orderNumber).status = 'ready';
     }
   }, waitTime * 60 * 1000);
 
@@ -62,7 +64,7 @@ router.post('/', (req, res) => {
 // GET /api/orders/:id - get order status
 router.get('/:id', (req, res) => {
   const orderId = req.params.id.startsWith('#') ? req.params.id : `#${req.params.id}`;
-  const order = orders.get(orderId);
+  const order = _store.get(orderId);
 
   if (!order) {
     return res.status(404).json({ error: 'Order not found' });
@@ -70,5 +72,10 @@ router.get('/:id', (req, res) => {
 
   res.json(order);
 });
+
+// Export shared store so admin routes can reference it
+router._store = _store;
+router._counter = () => _counter;
+router._incrementCounter = () => ++_counter;
 
 module.exports = router;
